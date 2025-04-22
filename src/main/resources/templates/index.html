@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title th:text="${title}"></title>
+    <style>
+        @font-face {
+            font-family: 'RixYeoljeongdo_Regular';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2102-01@1.0/RixYeoljeongdo_Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            padding: 1rem;
+            font-family: 'RixYeoljeongdo_Regular', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>파일 업로드</h1>
+    <section>
+        <form id="file-form">
+            <label>
+                파일 : <input type="file" id="file-input" accept=".pdf, .xlsx, .xls, image/*">
+            </label>
+            <button type="submit">제출</button>
+        </form>
+    </section>
+    <section>
+        <section id="file-list"></section>
+    </section>
+    <script>
+        const fileForm = document.querySelector('#file-form');
+        const fileInput = document.querySelector('#file-input');
+        const fileList = document.querySelector('#file-list');
+        fileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log(fileInput.files);
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('files', file);
+            const response = await fetch("/api/file", {
+                method: 'POST',
+                body: formData,
+            });
+            console.log(response.status);
+            if (response.status === 200) {
+                alert("업로드 되었습니다!");
+                fileInput.value = ""; // 업로드된 파일 리셋.
+                await getFiles();
+            } else {
+                alert("업로드가 실패했습니다!");
+            }
+        });
+        async function getFiles() {
+            const response = await fetch("/api/file", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            fileList.innerHTML = JSON.stringify(data);
+        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            await getFiles();
+        });
+    </script>
+</body>
+</html>
